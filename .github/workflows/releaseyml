@@ -1,0 +1,61 @@
+name: gomuks-android
+
+env:
+  main_prokect_module: net.vrkknn.gomuks
+  playstore_name: gomuks
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '18'
+        distribution: 'zulu'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Build with Gradle
+      run: ./gradlew assemble --stacktrace
+    
+    - name: Upload missing rules
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: r8-missing-rules
+        path: app/build/outputs/mapping/release/missing_rules.txt
+
+    - name: List APKs
+      run: |
+        echo "### Built APKs" >> $GITHUB_STEP_SUMMARY
+        find app/ -name "*.apk" | tee -a $GITHUB_STEP_SUMMARY
+
+    - name: Upload release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: net.vrkknn.gomuks
+        path: app/build/outputs/apk/release/net.vrkknn.gomuks_arm64-v8a-release.apk
+
+    - name: Deploy nightly
+      uses: WebFreak001/deploy-nightly@v3.1.0
+      with:
+        upload_url: https://uploads.github.com/repos/Virkkunen/gomuks/android/releases/xxxxx/assets{?name, label}
+        release_id: xxxxx
+        asset_path: app/build/outputs/apk/release/net.vrkknn.gomuks_arm64-v8a-release.apk
+        asset_name: gomuks.vrkknn.net_release-$$.apk
+        asset_content_type: application/vnd.android.package-archive
+        max_releases: 5
+        
