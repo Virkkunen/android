@@ -1,4 +1,4 @@
-package app.gomuks.android;
+package net.vrkknn.gomuks;
 
 import android.app.Activity;
 import android.app.AlertDialog;

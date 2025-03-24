@@ -1,4 +1,4 @@
-package app.gomuks.android
+package net.vrkknn.gomuks
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

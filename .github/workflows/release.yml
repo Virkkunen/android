@@ -1,0 +1,112 @@
+name: gomuks-android
+
+env:
+  main_project_module: net.vrkknn.gomuks
+  playstore_name: gomuks
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'zulu'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Decode keystore
+      run: |
+        echo "${{ secrets.KEYSTORE }}" | base64 -d > /home/runner/keystore.jks
+        chmod 600 /home/runner/keystore.jks
+      shell: bash
+    
+    - name: Build with Gradle
+      run: ./gradlew assemble --stacktrace
+      env:
+         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+         KEYSTORE: "/home/runner/keystore.jks"
+         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+    
+    - name: Upload missing R8 rules
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: r8-missing-rules
+        path: app/build/outputs/mapping/release/missing_rules.txt
+
+    - name: List APKs
+      run: |
+        echo ":: APKs" >> $GITHUB_STEP_SUMMARY
+        find app/ -name "*.apk" | tee -a $GITHUB_STEP_SUMMARY
+
+    - name: Upload release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: net.vrkknn.gomuks
+        path: app/build/outputs/apk/release/app-release-unsigned.apk
+
+    # - name: Sign APK
+    #   id: sign_app
+    #   uses: ilharp/sign-android-release@v1.0.4
+    #   with:
+    #     releaseDir: app/build/outputs/apk/release
+    #     signingKey: ${{ secrets.KEYSTORE }}
+    #     keyAlias: $${{ secrets.KEY_ALIAS }}
+    #     keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+    #     keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+    - name: Build Changelog
+      id: changelog
+      uses: ardalanamini/auto-changelog@v3
+      with:
+        mention-authors: true
+        mention-new-contributors: false
+        include-compare: true
+        semver: false
+
+    - name: Create Release
+      id: create_release
+      uses: ncipollo/release-action@v1.13.0
+      with:
+        artifacts: "app/build/outputs/apk/release/app-release-signed.apk"
+        body: ${{ steps.changelog.outputs.changelog }}
+        tag: ${{ github.event.head_commit.message }}
+        name: Release ${{ github.event.head_commit.message }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    # - name: Generate tag and release
+    #   id: create_release
+    #   run: |
+    #     TAG_NAME="release-$(date +'%Y%m%d-%H%M%S')"
+    #     gh release create "$TAG_NAME" \
+    #       --title "$TAG_NAME" \
+    #       --notes "Automated release $TAG_NAME"
+    #     echo "release_id=$(gh release view "$TAG_NAME" --json id -q '.id')" >> $GITHUB_OUTPUT
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # - name: Deploy nightly
+    #   uses: WebFreak001/deploy-nightly@v3.1.0
+    #   with:
+    #     upload_url: ${{ github.api_url }}/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.release_id }}/assets{?name, label}
+    #     release_id: ${{ steps.create_release.outputs.release_id }}
+    #     asset_path: app/build/outputs/apk/release/app-release-signed.apk
+    #     asset_name: gomuks.vrkknn.net-$(date +'%Y%m%d-%H%M%S').apk
+    #     asset_content_type: application/vnd.android.package-archive
+    #     max_releases: 5
+        

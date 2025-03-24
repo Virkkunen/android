@@ -1,3 +1,12 @@
+//import java.util.Properties
+//
+//val keystorePropertiesFile = rootProject.file("keystore.properties")
+//val keystoreProperties = Properties().apply {
+//    if (keystorePropertiesFile.exists()) {
+//        load(keystorePropertiesFile.inputStream())
+//    }
+//}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,11 +16,11 @@ plugins {
 }
 
 android {
-    namespace = "app.gomuks.android"
+    namespace = "net.vrkknn.gomuks"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "app.gomuks.android"
+        applicationId = "net.vrkknn.gomuks"
         minSdk = 33
         targetSdk = 35
         versionCode = 1
@@ -20,13 +29,31 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+//    signingConfigs {
+//        create("release") {
+//            keyAlias = keystoreProperties["keyAlias"].toString()
+//            keyPassword = keystoreProperties["keyPassword"].toString()
+//            storeFile = keystoreProperties["keystore"] as File?
+//            storePassword = keystoreProperties["storePassword"].toString()
+//        }
+//    }
+    signingConfigs {
+        create("release") {
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+            storeFile = File(System.getenv("KEYSTORE"))
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -53,6 +80,12 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.snakeyaml.engine)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.activity.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
