@@ -1,7 +1,7 @@
 name: gomuks-android
 
 env:
-  main_prokect_module: net.vrkknn.gomuks
+  main_project_module: net.vrkknn.gomuks
   playstore_name: gomuks
 
 on:
@@ -21,7 +21,7 @@ jobs:
     - name: set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '18'
         distribution: 'zulu'
         cache: gradle
 
@@ -48,6 +48,9 @@ jobs:
       with:
         name: net.vrkknn.gomuks
         path: app/build/outputs/apk/release/net.vrkknn.gomuks_arm64-v8a-release.apk
+
+    - name: Install gh cli
+      run: sudo apt update && sudo apt install gh -y
 
     - name: Generate tag and release
       id: create_release
