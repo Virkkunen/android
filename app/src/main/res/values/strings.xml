@@ -9,7 +9,7 @@
     <string name="authentication_failed_error">Authentication failed</string>
     <string name="not_gomuks_error">Provided URL is not a gomuks web instance</string>
 
-    <string name="preference_file_key">app.gomuks.android.server_settings</string>
+    <string name="preference_file_key">net.vrkknn.gomuks.server_settings</string>
     <string name="server_url_key">server_url</string>
     <string name="device_id_key">device_uuid</string>
     <string name="push_token_key">push_token</string>

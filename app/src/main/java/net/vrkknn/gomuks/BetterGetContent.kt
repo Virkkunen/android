@@ -1,4 +1,4 @@
-package app.gomuks.android
+package net.vrkknn.gomuks
 
 import android.app.Activity
 import android.content.ClipData
@@ -10,7 +10,7 @@ import android.util.Log
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import app.gomuks.android.BetterGetContent.Result
+import net.vrkknn.gomuks.BetterGetContent.Result
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date

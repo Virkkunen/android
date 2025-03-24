@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:1004353015207:android:d7d52dc7721606afa2fa82",
         "android_client_info": {
-          "package_name": "app.gomuks.android"
+          "package_name": "net.vrkknn.gomuks"
         }
       },
       "oauth_client": [],

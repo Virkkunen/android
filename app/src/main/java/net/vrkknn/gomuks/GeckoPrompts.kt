@@ -1,4 +1,4 @@
-package app.gomuks.android
+package net.vrkknn.gomuks
 
 import android.content.ActivityNotFoundException
 import android.net.Uri

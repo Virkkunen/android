@@ -1,0 +1,81 @@
+name: gomuks-android
+
+env:
+  main_project_module: net.vrkknn.gomuks
+  playstore_name: gomuks
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'zulu'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Decode keystore
+      run: |
+        echo "${{ secrets.KEYSTORE }}" | base64 -d > /home/runner/keystore.jks
+        chmod 600 /home/runner/keystore.jks
+      shell: bash
+    
+    - name: Build with Gradle
+      run: ./gradlew assembleRelease --stacktrace
+      env:
+         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+         KEYSTORE: "/home/runner/keystore.jks"
+         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+    
+    - name: Upload missing R8 rules
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: r8-missing-rules
+        path: app/build/outputs/mapping/release/missing_rules.txt
+
+    - name: Rename APKs
+      run: |
+        RELEASE_DATE=$(date +%Y%m%d)
+        find app/build/outputs/apk/release/ -name "app-*-release.apk" -exec sh -c 'mv "$0" "${0/app-/vrkknn_gomuks-}"' {} \;
+        find app/build/outputs/apk/release/ -name "*.apk" | tee -a $GITHUB_STEP_SUMMARY
+
+    - name: Upload release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: net.vrkknn.gomuks
+        path: "app/build/outputs/apk/release/*.apk"
+
+    - name: Build Changelog
+      id: changelog
+      uses: ardalanamini/auto-changelog@v3
+      with:
+        mention-authors: true
+        mention-new-contributors: false
+        include-compare: true
+        semver: false
+
+    - name: Create Release and Tag
+      run: |
+        gh release create "v$(date +%Y%m%d-%H%M%S)" \
+          --title "Release $(date +%Y%m%d-%H%M%S)" \
+          --notes "${{ steps.changelog.outputs.changelog }}" \
+          app/build/outputs/apk/release/*.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        

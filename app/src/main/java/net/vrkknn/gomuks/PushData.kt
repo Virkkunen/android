@@ -1,4 +1,4 @@
-package app.gomuks.android
+package net.vrkknn.gomuks
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
