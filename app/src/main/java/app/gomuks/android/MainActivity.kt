@@ -3,6 +3,7 @@ package app.gomuks.android
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -135,6 +136,7 @@ class MainActivity : ComponentActivity() {
         session.open(runtime)
         view.setSession(session)
         addSystemInsets()
+        updateSystemBarsColours(resources.configuration)
 
         File(cacheDir, "upload").mkdirs()
 
@@ -248,6 +250,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateSystemBarsColours(newConfig)
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         val windowInsets = ViewCompat.getRootWindowInsets(window.decorView)
         val statusBarInset = windowInsets?.getInsets(WindowInsetsCompat.Type.statusBars())?.top ?: 0
@@ -265,22 +272,6 @@ class MainActivity : ComponentActivity() {
         val (serverURL, username, password) = getCredentials() ?: Triple("", "", "")
         setContent {
             ServerInput(serverURL, username, password, error)
-        }
-    }
-
-    private fun addSystemInsets() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
-            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-
-            if (imeInsets.bottom > 0) {
-                v.setPadding(0, systemInsets.top, 0, imeInsets.bottom)
-            } else {
-                v.setPadding(0, systemInsets.top, 0, 0)
-            }
-
-            insets
         }
     }
 
@@ -370,6 +361,32 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.padding(16.dp)
                 )
             }
+        }
+    }
+
+    private fun updateSystemBarsColours(configuration: Configuration) {
+        val isNightMode = configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        val systemBarIconLight = !isNightMode
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+
+        window.decorView.setBackgroundColor(getColor(R.color.header_color))
+        windowInsetsController.isAppearanceLightStatusBars = systemBarIconLight
+        windowInsetsController.isAppearanceLightNavigationBars = systemBarIconLight
+    }
+
+    private fun addSystemInsets() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            if (imeInsets.bottom > 0) {
+                v.setPadding(0, systemInsets.top, 0, imeInsets.bottom)
+            } else {
+                v.setPadding(0, systemInsets.top, 0, 0)
+            }
+
+            insets
         }
     }
 }
