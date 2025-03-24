@@ -21,7 +21,7 @@ jobs:
     - name: set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '18'
+        java-version: '17'
         distribution: 'zulu'
         cache: gradle
 
@@ -49,13 +49,24 @@ jobs:
         name: net.vrkknn.gomuks
         path: app/build/outputs/apk/release/net.vrkknn.gomuks_arm64-v8a-release.apk
 
+    - name: Generate tag and release
+      id: create_release
+      run: |
+        TAG_NAME="release-$(date +'%Y%m%d-%H%M%S')"
+        gh release create "$TAG_NAME" \
+          --title "Release $TAG_NAME" \
+          --notes "Automated release $TAG_NAME"
+        echo "release_id=$(gh release view "$TAG_NAME" --json id -q '.id')" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Deploy nightly
       uses: WebFreak001/deploy-nightly@v3.1.0
       with:
-        upload_url: https://uploads.github.com/repos/Virkkunen/gomuks/android/releases/xxxxx/assets{?name, label}
-        release_id: xxxxx
+        upload_url: ${{ github.api_url }}/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.release_id }}/assets{?name, label}
+        release_id: ${{ steps.create_release.outputs.release_id }}
         asset_path: app/build/outputs/apk/release/net.vrkknn.gomuks_arm64-v8a-release.apk
-        asset_name: gomuks.vrkknn.net_release-$$.apk
+        asset_name: gomuks.vrkknn.net_release-$(date +'%Y%m%d-%H%M%S').apk
         asset_content_type: application/vnd.android.package-archive
         max_releases: 5
         
