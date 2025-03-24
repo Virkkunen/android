@@ -1,4 +1,4 @@
-package app.gomuks.android.ui.theme
+package net.vrkknn.gomuks.ui.theme
 
 import android.app.Activity
 import android.os.Build

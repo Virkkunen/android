@@ -1,4 +1,4 @@
-package app.gomuks.android.ui.theme
+package net.vrkknn.gomuks.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

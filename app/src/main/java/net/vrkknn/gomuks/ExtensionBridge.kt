@@ -1,4 +1,4 @@
-package app.gomuks.android
+package net.vrkknn.gomuks
 
 import android.util.Base64
 import android.util.Log

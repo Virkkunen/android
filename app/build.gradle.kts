@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "app.gomuks.android"
+    namespace = "net.vrkknn.gomuks"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "app.gomuks.android"
+        applicationId = "net.vrkknn.gomuks"
         minSdk = 33
         targetSdk = 35
         versionCode = 1
