@@ -47,7 +47,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: net.vrkknn.gomuks
-        path: app/build/outputs/apk/release/net.vrkknn.gomuks_arm64-v8a-release.apk
+        path: app/build/outputs/apk/release/app-arm64-v8a-release.apk
 
     - name: Install gh cli
       run: sudo apt update && sudo apt install gh -y
@@ -57,7 +57,7 @@ jobs:
       run: |
         TAG_NAME="release-$(date +'%Y%m%d-%H%M%S')"
         gh release create "$TAG_NAME" \
-          --title "Release $TAG_NAME" \
+          --title "$TAG_NAME" \
           --notes "Automated release $TAG_NAME"
         echo "release_id=$(gh release view "$TAG_NAME" --json id -q '.id')" >> $GITHUB_OUTPUT
       env:
@@ -68,7 +68,7 @@ jobs:
       with:
         upload_url: ${{ github.api_url }}/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.release_id }}/assets{?name, label}
         release_id: ${{ steps.create_release.outputs.release_id }}
-        asset_path: app/build/outputs/apk/release/net.vrkknn.gomuks_arm64-v8a-release.apk
+        asset_path: app/build/outputs/apk/release/app-arm64-v8a-release.apk
         asset_name: gomuks.vrkknn.net_release-$(date +'%Y%m%d-%H%M%S').apk
         asset_content_type: application/vnd.android.package-archive
         max_releases: 5
