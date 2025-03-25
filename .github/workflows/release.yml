@@ -79,7 +79,7 @@ jobs:
         gh release create "v$(date +%Y%m%d-%H%M%S)" \
           --title "Release $(date +%Y%m%d-%H%M%S)" \
           --notes "${{ steps.changelog.outputs.changelog }}" \
-          app/build/outputs/apk/release/vrkknn_gomuks-$RELEASE_DATE.apk
+          app/build/outputs/apk/release/*.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
