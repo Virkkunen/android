@@ -1,8 +1,8 @@
 name: gomuks-android
 
-# env:
-#   main_project_module: net.vrkknn.gomuks
-#   playstore_name: gomuks
+env:
+  main_project_module: net.vrkknn.gomuks
+  playstore_name: gomuks
 
 on:
   workflow_dispatch:
@@ -54,7 +54,7 @@ jobs:
       run: |
           RELEASE_DATE=$(date +%Y%m%d)
           ORIGINAL_APK="app/build/outputs/apk/release/app-release.apk"
-          RENAMED_APK="app/build/outputs/apk/release/net.vrkknn.gomuks-$RELEASE_DATE.apk"
+          RENAMED_APK="app/build/outputs/apk/release/vrkknn_gomuks-$RELEASE_DATE.apk"
           mv "$ORIGINAL_APK" "$RENAMED_APK"
           echo ":: APKs" >> $GITHUB_STEP_SUMMARY
           find app/build/outputs/apk/release/ -name "*.apk" | tee -a $GITHUB_STEP_SUMMARY
@@ -63,7 +63,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: net.vrkknn.gomuks
-        path: "app/build/outputs/apk/release/net.vrkknn.gomuks-*.apk"
+        path: "app/build/outputs/apk/release/vrkknn_gomuks-*.apk"
 
     - name: Build Changelog
       id: changelog
@@ -79,7 +79,7 @@ jobs:
         gh release create "v$(date +%Y%m%d-%H%M%S)" \
           --title "Release $(date +%Y%m%d-%H%M%S)" \
           --notes "${{ steps.changelog.outputs.changelog }}" \
-          app/build/outputs/apk/release/net.vrkknn.gomuks-$RELEASE_DATE.apk
+          app/build/outputs/apk/release/vrkknn_gomuks-$RELEASE_DATE.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
