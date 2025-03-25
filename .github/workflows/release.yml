@@ -1,8 +1,8 @@
 name: gomuks-android
 
-env:
-  main_project_module: net.vrkknn.gomuks
-  playstore_name: gomuks
+# env:
+#   main_project_module: net.vrkknn.gomuks
+#   playstore_name: gomuks
 
 on:
   workflow_dispatch:
@@ -50,6 +50,7 @@ jobs:
         path: app/build/outputs/mapping/release/missing_rules.txt
 
     - name: Rename APK
+      id: rename
       run: |
           RELEASE_DATE=$(date +%Y%m%d)
           ORIGINAL_APK="app/build/outputs/apk/release/app-release.apk"
