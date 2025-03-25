@@ -49,26 +49,21 @@ jobs:
         name: r8-missing-rules
         path: app/build/outputs/mapping/release/missing_rules.txt
 
-    - name: List APKs
+    - name: Rename APK
+      id: rename
       run: |
-        echo ":: APKs" >> $GITHUB_STEP_SUMMARY
-        find app/ -name "*.apk" | tee -a $GITHUB_STEP_SUMMARY
+          RELEASE_DATE=$(date +%Y%m%d)
+          ORIGINAL_APK="app/build/outputs/apk/release/app-release.apk"
+          RENAMED_APK="app/build/outputs/apk/release/vrkknn_gomuks-$RELEASE_DATE.apk"
+          mv "$ORIGINAL_APK" "$RENAMED_APK"
+          echo ":: APKs" >> $GITHUB_STEP_SUMMARY
+          find app/build/outputs/apk/release/ -name "*.apk" | tee -a $GITHUB_STEP_SUMMARY
 
     - name: Upload release APK
       uses: actions/upload-artifact@v4
       with:
         name: net.vrkknn.gomuks
-        path: app/build/outputs/apk/release/app-release-unsigned.apk
-
-    # - name: Sign APK
-    #   id: sign_app
-    #   uses: ilharp/sign-android-release@v1.0.4
-    #   with:
-    #     releaseDir: app/build/outputs/apk/release
-    #     signingKey: ${{ secrets.KEYSTORE }}
-    #     keyAlias: $${{ secrets.KEY_ALIAS }}
-    #     keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-    #     keyPassword: ${{ secrets.KEY_PASSWORD }}
+        path: "app/build/outputs/apk/release/vrkknn_gomuks-*.apk"
 
     - name: Build Changelog
       id: changelog
@@ -79,34 +74,12 @@ jobs:
         include-compare: true
         semver: false
 
-    - name: Create Release
-      id: create_release
-      uses: ncipollo/release-action@v1.13.0
-      with:
-        artifacts: "app/build/outputs/apk/release/app-release-signed.apk"
-        body: ${{ steps.changelog.outputs.changelog }}
-        tag: ${{ github.event.head_commit.message }}
-        name: Release ${{ github.event.head_commit.message }}
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    # - name: Generate tag and release
-    #   id: create_release
-    #   run: |
-    #     TAG_NAME="release-$(date +'%Y%m%d-%H%M%S')"
-    #     gh release create "$TAG_NAME" \
-    #       --title "$TAG_NAME" \
-    #       --notes "Automated release $TAG_NAME"
-    #     echo "release_id=$(gh release view "$TAG_NAME" --json id -q '.id')" >> $GITHUB_OUTPUT
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # - name: Deploy nightly
-    #   uses: WebFreak001/deploy-nightly@v3.1.0
-    #   with:
-    #     upload_url: ${{ github.api_url }}/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.release_id }}/assets{?name, label}
-    #     release_id: ${{ steps.create_release.outputs.release_id }}
-    #     asset_path: app/build/outputs/apk/release/app-release-signed.apk
-    #     asset_name: gomuks.vrkknn.net-$(date +'%Y%m%d-%H%M%S').apk
-    #     asset_content_type: application/vnd.android.package-archive
-    #     max_releases: 5
+    - name: Create Release and Tag
+      run: |
+        gh release create "v$(date +%Y%m%d-%H%M%S)" \
+          --title "Release $(date +%Y%m%d-%H%M%S)" \
+          --notes "${{ steps.changelog.outputs.changelog }}" \
+          app/build/outputs/apk/release/vrkknn_gomuks-$RELEASE_DATE.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
