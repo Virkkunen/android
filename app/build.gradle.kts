@@ -1,12 +1,3 @@
-//import java.util.Properties
-//
-//val keystorePropertiesFile = rootProject.file("keystore.properties")
-//val keystoreProperties = Properties().apply {
-//    if (keystorePropertiesFile.exists()) {
-//        load(keystorePropertiesFile.inputStream())
-//    }
-//}
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -29,14 +20,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-//    signingConfigs {
-//        create("release") {
-//            keyAlias = keystoreProperties["keyAlias"].toString()
-//            keyPassword = keystoreProperties["keyPassword"].toString()
-//            storeFile = keystoreProperties["keystore"] as File?
-//            storePassword = keystoreProperties["storePassword"].toString()
-//        }
-//    }
     signingConfigs {
         create("release") {
             keyAlias = System.getenv("KEY_ALIAS")
@@ -50,6 +33,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -66,6 +50,14 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
+            isUniversalApk = false
+        }
     }
 }
 
