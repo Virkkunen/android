@@ -58,17 +58,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: net.vrkknn.gomuks
-        path: app/build/outputs/apk/release/app-release-unsigned.apk
-
-    # - name: Sign APK
-    #   id: sign_app
-    #   uses: ilharp/sign-android-release@v1.0.4
-    #   with:
-    #     releaseDir: app/build/outputs/apk/release
-    #     signingKey: ${{ secrets.KEYSTORE }}
-    #     keyAlias: $${{ secrets.KEY_ALIAS }}
-    #     keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-    #     keyPassword: ${{ secrets.KEY_PASSWORD }}
+        path: app/build/outputs/apk/release/app-release.apk
 
     - name: Build Changelog
       id: changelog
@@ -83,7 +73,7 @@ jobs:
       id: create_release
       uses: ncipollo/release-action@v1.13.0
       with:
-        artifacts: "app/build/outputs/apk/release/app-release-signed.apk"
+        artifacts: "app/build/outputs/apk/release/app-release.apk"
         body: ${{ steps.changelog.outputs.changelog }}
         tag: ${{ github.event.head_commit.message }}
         name: Release ${{ github.event.head_commit.message }}
